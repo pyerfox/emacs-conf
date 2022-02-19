@@ -144,6 +144,7 @@
   (setq evil-want-C-i-jump nil)
   (setq evil-respect-visual-line-mode t)
   (setq evil-undo-system 'undo-tree)
+  (setq select-enable-clipboard nil)
   :config
   ;;(add-hook 'evil-mode-hook 'dw/evil-hook)
   (evil-mode 1)
@@ -196,7 +197,7 @@
    "C-M-j" 'counsel-switch-buffer)
   (general-create-definer dw/leader-key-def
     :keymaps '(normal insert visual emacs)
-    :global-prefix "M-SPC"))
+    :prefix "M-SPC"))
  
 ;; (defhydra hydra-text-scale (:timeout 4)
 ;;   "scale text"
@@ -205,6 +206,58 @@
 ;;   ("f" nil "finished" :exit t))
 ;; (dw/leader-key-def "ts" '(hydra-text-scale/body :which-key "scale text"))
 
+;; (defun dw/switch-project-action ()
+;;   "Switch to a workspace with the project name and start `magit-status'."
+;;   ;; TODO: Switch to EXWM workspace 1?
+;;   (persp-switch (projectile-project-name))
+;;   (magit-status))
+
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :demand t
+  :bind-keymap
+  ("C-c p" . projectile-command-map))
+;;  :init
+;;  (when (file-directory-p "~/Projects/Code")
+;;    (setq projectile-project-search-path '("~/Projects/Code")))
+;;  (setq projectile-switch-project-action #'dw/switch-project-action))
+
+(use-package counsel-projectile
+  :after projectile
+  :bind (("C-M-p" . counsel-projectile-find-file))
+  :config
+  (counsel-projectile-mode))
+
+;; (dw/leader-key-def
+;;   "pf"  'counsel-projectile-find-file
+;;   "ps"  'counsel-projectile-switch-project
+;;   ;; "pF"  'counsel-projectile-rg
+;;   ;; "pF"  'consult-ripgrep
+;;   "pp"  'counsel-projectile
+;;   "pc"  'projectile-compile-project
+;;   "pd"  'projectile-dired)
+
+(use-package magit
+  ;; :bind ("C-M-;" . magit-status)
+  ;; :commands (magit-status magit-get-current-branch)
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+;; (dw/leader-key-def
+;;   "g"   '(:ignore t :which-key "git")
+;;   "gs"  'magit-status
+;;   "gd"  'magit-diff-unstaged
+;;   "gc"  'magit-branch-or-checkout
+;;   "gl"   '(:ignore t :which-key "log")
+;;   "glc" 'magit-log-current
+;;   "glf" 'magit-log-buffer-file
+;;   "gb"  'magit-branch
+;;   "gP"  'magit-push-current
+;;   "gp"  'magit-pull-branch
+;;   "gf"  'magit-fetch
+;;   "gF"  'magit-fetch-all
+;;   "gr"  'magit-rebase)
 
 
 ;;__________________________________________
@@ -215,7 +268,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ivy-hydra hydra evil-collection evil undo-tree general doom-themes helpful counsel ivy-rich which-key rainbow-delimiters doom-modeline diminish swiper ivy use-package)))
+   '(evil-magit magit counsel-projectile projectile ivy-hydra hydra evil-collection evil undo-tree general doom-themes helpful counsel ivy-rich which-key rainbow-delimiters doom-modeline diminish swiper ivy use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
