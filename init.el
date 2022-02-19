@@ -15,8 +15,6 @@
                     :weight 'normal
                     :height 100)
 
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
 ;; Initialize package sources
 (require 'package)
 
@@ -48,6 +46,15 @@
 		eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+(use-package counsel
+  :bind (("M-x" . counsel-M-x)
+	 ("C-x b" . counsel-ibuffer)
+	 ("C-x C-f" . counsel-find-file)
+	 :map minibuffer-local-map
+	 ("C-r" . 'counsel-minibuffer-history))
+  :config
+  (setq ivy-initial-inputs-alist nil))
+
 (use-package diminish)
 (use-package swiper)
 (use-package ivy
@@ -66,20 +73,11 @@
          :map ivy-reverse-i-search-map
          ("C-k" . ivy-previous-line)
          ("C-d" . ivy-reverse-i-search-kill))
-  :init
+  :config
   (ivy-mode 1))
 
-(use-package counsel
-  :bind (("M-x" . counsel-M-x)
-	 ("C-x b" . counsel-ibuffer)
-	 ("C-x C-f" . counsel-find-file)
-	 :map minibuffer-local-map
-	 ("C-r" . 'counsel-minibuffer-history))
-  :config
-  (setq ivy-initial-inputs-alist nil))
-
 (use-package ivy-rich
-  :init
+  :config
   (ivy-rich-mode 1))
 
 (use-package helpful
@@ -94,9 +92,9 @@
   ([remap describe-key] . helpful-key))
 
 ;; run once (all-the-icons-install-fonts)
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
+(use-package doom-modeline  
   :config
+  (doom-modeline-mode 1)
   (setq doom-modeline-height 1)
   (set-face-attribute 'mode-line nil :height 80)
   (set-face-attribute 'mode-line-inactive nil
@@ -112,11 +110,102 @@
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package which-key
-  :init (which-key-mode)
   :diminish which-key-mode
   :config
+  (which-key-mode 1)
   (define-key help-map "\C-h" 'which-key-C-h-dispatch)
   (setq which-key-idle-delay 0.3))
+
+;; (defun dw/evil-hook ()
+;;   (dolist (mode '(custom-mode
+;;                   eshell-mode
+;;                   git-rebase-mode
+;;                   erc-mode
+;;                   circe-server-mode
+;;                   circe-chat-mode
+;;                   circe-query-mode
+;;                   sauron-mode
+;;                   term-mode))
+;;   (add-to-list 'evil-emacs-state-modes mode)))
+
+(defun dw/dont-arrow-me-bro ()
+  (interactive)
+  (message "Arrow keys are bad, you know?"))
+
+(use-package undo-tree
+  :init
+  (global-undo-tree-mode 1))
+
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  (setq evil-respect-visual-line-mode t)
+  (setq evil-undo-system 'undo-tree)
+  :config
+  ;;(add-hook 'evil-mode-hook 'dw/evil-hook)
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+  ;; ;;(unless dw/is-termux
+  ;;   ;; Disable arrow keys in normal and visual modes
+  ;;   (define-key evil-normal-state-map (kbd "<left>") 'dw/dont-arrow-me-bro)
+  ;;   (define-key evil-normal-state-map (kbd "<right>") 'dw/dont-arrow-me-bro)
+  ;;   (define-key evil-normal-state-map (kbd "<down>") 'dw/dont-arrow-me-bro)
+  ;;   (define-key evil-normal-state-map (kbd "<up>") 'dw/dont-arrow-me-bro)
+  ;;   (evil-global-set-key 'motion (kbd "<left>") 'dw/dont-arrow-me-bro)
+  ;;   (evil-global-set-key 'motion (kbd "<right>") 'dw/dont-arrow-me-bro)
+  ;;   (evil-global-set-key 'motion (kbd "<down>") 'dw/dont-arrow-me-bro)
+  ;;   (evil-global-set-key 'motion (kbd "<up>") 'dw/dont-arrow-me-bro);;)
+
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
+(use-package evil-collection
+  :after evil
+  :init
+  (setq evil-collection-company-use-tng nil)  ;; Is this a bug in evil-collection?
+  :custom
+  (evil-collection-outline-bind-tab-p nil)
+  :config
+  (setq evil-collection-mode-list
+        (remove 'lispy evil-collection-mode-list))
+  (evil-collection-init))
+
+(use-package hydra
+  :defer t)
+
+(use-package ivy-hydra
+  :defer t
+  :after hydra)
+
+;; (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+;; (global-set-key (kbd "C-M-j") 'counsel-switch-buffer)
+(use-package general
+  :config
+  (general-evil-setup t)
+  (general-define-key
+   "<escape>" 'keyboard-esacpe-quit
+   "C-M-j" 'counsel-switch-buffer)
+  (general-create-definer dw/leader-key-def
+    :keymaps '(normal insert visual emacs)
+    :global-prefix "M-SPC"))
+ 
+;; (defhydra hydra-text-scale (:timeout 4)
+;;   "scale text"
+;;   ("j" text-scale-increase "in")
+;;   ("k" text-scale-decrease "out")
+;;   ("f" nil "finished" :exit t))
+;; (dw/leader-key-def "ts" '(hydra-text-scale/body :which-key "scale text"))
+
+
 
 ;;__________________________________________
 ;;
@@ -126,10 +215,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(doom-themes helpful counsel ivy-rich which-key rainbow-delimiters doom-modeline diminish swiper ivy use-package)))
+   '(ivy-hydra hydra evil-collection evil undo-tree general doom-themes helpful counsel ivy-rich which-key rainbow-delimiters doom-modeline diminish swiper ivy use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
-)
+ )
