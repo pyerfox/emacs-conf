@@ -1,4 +1,9 @@
 
+;;(set-langauge-environment "Korean")
+(prefer-coding-system 'utf-8)
+(set-file-name-coding-system 'cp949-dos)
+(global-unset-key (kbd "S-SPC"))
+
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -8,12 +13,18 @@
 (menu-bar-mode -1)          ; Disable the menu bar
 
 (setq visible-bell t)
+
 (setq make-backup-files nil)
+(setq create-lockfiles nil)
+
+(setq x-select-enable-clipboard nil)
 
 (set-face-attribute 'default nil
                     :font "Fira Code"
                     :weight 'normal
                     :height 100)
+;; (set-fontset-font "fontset-default" 'hangul '("D2Coding" . "unicode-bmp"))
+;; (setq face-font-rescale-alist '(("D2Coding" . 1.3)))
 
 ;; Initialize package sources
 (require 'package)
@@ -205,6 +216,47 @@
 ;;   ("f" nil "finished" :exit t))
 ;; (dw/leader-key-def "ts" '(hydra-text-scale/body :which-key "scale text"))
 
+(defun dw/org-mode-setup ()
+  (org-indent-mode)
+  (auto-fill-mode 0)
+  (visual-line-mode 1)
+  (setq evil-auto-indent nil)
+  (diminish org-indent-mode)
+(set-face-attribute 'org-document-title nil :weight 'bold :height 1.4)
+(dolist (face '((org-level-1 . 1.2)
+                (org-level-2 . 1.1)
+                (org-level-3 . 1.05)
+                (org-level-4 . 1.0)
+                (org-level-5 . 1.1)
+                (org-level-6 . 1.1)
+                (org-level-7 . 1.1)
+                (org-level-8 . 1.1)))
+  (set-face-attribute (car face) nil :weight 'medium :height (cdr face))))
+
+(use-package org
+  :defer t
+  :hook (org-mode . dw/org-mode-setup)  
+  :config
+  (setq org-ellipsis " ▼"
+	org-agenda-files '()
+	org-hide-emphasis-markers t
+	))
+        ;; org-src-fontify-natively t
+        ;; org-fontify-quote-and-verse-blocks t
+        ;; org-src-tab-acts-natively t
+        ;; org-edit-src-content-indentation 2
+        ;; org-hide-block-startup nil
+        ;; org-src-preserve-indentation nil
+        ;; org-startup-folded 'content
+        ;; org-cycle-separator-lines 2))
+
+(use-package org-superstar
+  :after org
+  :hook (org-mode . org-superstar-mode)
+  :custom
+  (org-superstar-remove-leading-stars t)
+  (org-superstar-headline-bullets-list '("■" "○" "●" "○" "●" "○" "●")))
+
 
 
 ;;__________________________________________
@@ -215,7 +267,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ivy-hydra hydra evil-collection evil undo-tree general doom-themes helpful counsel ivy-rich which-key rainbow-delimiters doom-modeline diminish swiper ivy use-package)))
+   '(org-indent org-superstar ivy-hydra hydra evil-collection evil undo-tree general doom-themes helpful counsel ivy-rich which-key rainbow-delimiters doom-modeline diminish swiper ivy use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
