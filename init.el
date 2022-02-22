@@ -162,10 +162,10 @@
   (general-evil-setup)
   (general-define-key
    "<escape>" 'keyboard-esacpe-quit
-   "C-M-j" 'counsel-switch-buffer))
-  ;; (general-create-definer ecfg/leader-key-def
-  ;;   :keymaps '(normal insert visual emacs)
-  ;;   :prefix "M-SPC")
+   "C-M-j" 'counsel-switch-buffer)
+  (general-create-definer ecfg/leader-key-def
+    :keymaps '(normal insert visual emacs)
+    :prefix "M-SPC"))
 
 ;; (defhydra hydra-text-scale (:timeout 4)
 ;;   "scale text"
@@ -189,7 +189,7 @@
 ;;  "gF"  'magit-fetch-all
 ;;  "gr"  'magit-rebase)
 
-;; (dw/leader-key-def
+;; (ecfg/leader-key-def
 ;;   "pf"  'counsel-projectile-find-file
 ;;   "ps"  'counsel-projectile-switch-project
 ;;   "pF"  'counsel-projectile-rg
@@ -282,11 +282,13 @@
 (add-to-list 'org-structure-template-alist '("json" . "src json"))
 
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-block ((t (:background "#202030")))))
+ ;; '(org-block-begin-line
+ ;;   ((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF"))))
+ '(org-block
+   ((t (:background "#202030"))))
+ ;; '(org-block-end-line
+ ;;   ((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF"))))
+ )
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -303,10 +305,52 @@
           (lambda () (add-hook
                       'after-save-hook
                       'ecfg/org-babel-tangle-config)))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(org-superstar evil-collection evil general undo-tree rainbow-delimiters which-key helpful counsel-projectile projectile ivy-hydra hydra ivy-rich diminish counsel magit doom-modeline doom-themes use-package)))
+
+(use-package lsp-mode
+  :config
+  (lsp-enable-which-key-integration t))
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom (lsp-ui-doc-position 'bottom))
+
+;; (ecfg/leader-key-def
+;;   "l"  '(:ignore t :which-key "lsp")
+;;   "ld" 'xref-find-definitions
+;;   "lr" 'xref-find-references
+;;   "ln" 'lsp-ui-find-next-reference
+;;   "lp" 'lsp-ui-find-prev-reference
+;;   "ls" 'counsel-imenu
+;;   "le" 'lsp-ui-flycheck-list
+;;   "lS" 'lsp-ui-sideline-mode
+;;   "lX" 'lsp-execute-code-action)
+
+(use-package flycheck
+  :defer t
+  :hook (lsp-mode . flycheck-mode))
+
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
+        (:map lsp-mode-map
+              ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.3))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+(load (expand-file-name "~/quicklisp/slime-helper.el"))
+;; Replace "sbcl" with the path to your implementation
+(setq inferior-lisp-program "sbcl")
+
+(use-package eval-in-repl)
+
+(defun ecfg/eir-slime-setup ()
+  (local-set-key (kbd "<C-return>") 'eir-eval-in-slime))
+
+(require 'eval-in-repl-slime)
+(add-hook 'lisp-mode-hook #'ecfg/eir-slime-setup)

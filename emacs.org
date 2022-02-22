@@ -231,11 +231,11 @@
     (general-evil-setup)
     (general-define-key
      "<escape>" 'keyboard-esacpe-quit
-     "C-M-j" 'counsel-switch-buffer))
-    ;; (general-create-definer ecfg/leader-key-def
-    ;;   :keymaps '(normal insert visual emacs)
-    ;;   :prefix "M-SPC")
-
+     "C-M-j" 'counsel-switch-buffer)
+    (general-create-definer ecfg/leader-key-def
+      :keymaps '(normal insert visual emacs)
+      :prefix "M-SPC"))
+ 
   ;; (defhydra hydra-text-scale (:timeout 4)
   ;;   "scale text"
   ;;   ("j" text-scale-increase "in")
@@ -258,7 +258,7 @@
   ;;  "gF"  'magit-fetch-all
   ;;  "gr"  'magit-rebase)
 
-  ;; (dw/leader-key-def
+  ;; (ecfg/leader-key-def
   ;;   "pf"  'counsel-projectile-find-file
   ;;   "ps"  'counsel-projectile-switch-project
   ;;   "pF"  'counsel-projectile-rg
@@ -418,3 +418,82 @@
 
 * Development
 
+** lsp-mode
+
+#+begin_src emacs-lisp
+
+  (use-package lsp-mode
+    :config
+    (lsp-enable-which-key-integration t))
+
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :custom (lsp-ui-doc-position 'bottom))
+
+  ;; (ecfg/leader-key-def
+  ;;   "l"  '(:ignore t :which-key "lsp")
+  ;;   "ld" 'xref-find-definitions
+  ;;   "lr" 'xref-find-references
+  ;;   "ln" 'lsp-ui-find-next-reference
+  ;;   "lp" 'lsp-ui-find-prev-reference
+  ;;   "ls" 'counsel-imenu
+  ;;   "le" 'lsp-ui-flycheck-list
+  ;;   "lS" 'lsp-ui-sideline-mode
+  ;;   "lX" 'lsp-execute-code-action)
+
+#+end_src
+
+** flycheck
+
+#+begin_src emacs-lisp
+
+  (use-package flycheck
+    :defer t
+    :hook (lsp-mode . flycheck-mode))
+
+#+end_src
+
+** company
+
+#+begin_src emacs-lisp
+
+  (use-package company
+    :after lsp-mode
+    :hook (lsp-mode . company-mode)
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection))
+          (:map lsp-mode-map
+                ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.3))
+
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
+
+#+end_src
+
+** slime
+
+#+begin_src emacs-lisp
+
+  (load (expand-file-name "~/quicklisp/slime-helper.el"))
+  ;; Replace "sbcl" with the path to your implementation
+  (setq inferior-lisp-program "sbcl")
+
+#+end_src
+
+** eval-in-repl
+
+#+begin_src emacs-lisp
+
+  (use-package eval-in-repl)
+
+  (defun ecfg/eir-slime-setup ()
+    (local-set-key (kbd "<C-return>") 'eir-eval-in-slime))
+
+  (require 'eval-in-repl-slime)
+  (add-hook 'lisp-mode-hook #'ecfg/eir-slime-setup)
+
+
+#+end_src
