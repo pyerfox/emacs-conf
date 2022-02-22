@@ -43,6 +43,8 @@
 
   (setq x-select-enable-clipboard nil)
 
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
 #+end_src
 
 ** UI
@@ -219,6 +221,13 @@
 
 #+begin_src emacs-lisp
 
+  (use-package autorevert
+    :hook (after-init . global-auto-revert-mode))
+
+  (use-package paredit
+    :diminish paredit-mode
+    :hook ((emacs-lisp-mode lisp-mode racket-mode) . paredit-mode))
+
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
 
@@ -235,7 +244,7 @@
     (general-create-definer ecfg/leader-key-def
       :keymaps '(normal insert visual emacs)
       :prefix "M-SPC"))
- 
+
   ;; (defhydra hydra-text-scale (:timeout 4)
   ;;   "scale text"
   ;;   ("j" text-scale-increase "in")
@@ -448,8 +457,13 @@
 #+begin_src emacs-lisp
 
   (use-package flycheck
-    :defer t
-    :hook (lsp-mode . flycheck-mode))
+    :hook (prog-mode . flycheck-mode)
+    :config
+    (setq-default
+     flycheck-standard-error-navigation nil
+     flycheck-disabled-checkers '(racket)
+     flycheck-emacs-lisp-load-path 'inherit))
+     ;; flycheck-flake8rc "setupt.cfg"))
 
 #+end_src
 
@@ -458,12 +472,12 @@
 #+begin_src emacs-lisp
 
   (use-package company
-    :after lsp-mode
-    :hook (lsp-mode . company-mode)
-    :bind (:map company-active-map
-                ("<tab>" . company-complete-selection))
-          (:map lsp-mode-map
-                ("<tab>" . company-indent-or-complete-common))
+    :diminish company-mode
+    :hook (prog-mode . company-mode)
+    ;; :bind (:map company-active-map
+    ;;             ("<tab>" . company-complete-selection))
+    ;;       (:map lsp-mode-map
+    ;;             ("<tab>" . company-indent-or-complete-common))
     :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.3))
@@ -495,5 +509,197 @@
   (require 'eval-in-repl-slime)
   (add-hook 'lisp-mode-hook #'ecfg/eir-slime-setup)
 
+
+#+end_src
+
+** go
+
+#+begin_src emacs-lisp
+
+  (use-package go-mode
+    :mode "\\.go\\'"
+    :config
+    (setq gofmt-command "goimports")
+    (setq flycheck-go-vet-executable "go")
+    (setq flfycheck-go-staticcheck-executable "staticcheck")
+    (add-hook 'before-save-hook #'gofmt-before-save))
+
+#+end_src
+
+** racket
+
+#+begin_src emacs-lisp
+
+  (use-package racket-mode
+    :mode "\\.rkt\\'"
+    :after flycheck
+    :preface
+    ;; (defun bp-insert-lisp-section (section)
+    ;;   "Insert a LISP section header with SECTION at point."
+    ;;   (interactive "sSection: ")
+    ;;   (let ((suffix (s-repeat (- 72 (length section) 4) ";")))
+    ;;     (insert (format ";; %s %s\n" section suffix))))
+    (defvar bp-racket-defun-likes
+      '(call-with-browser!
+        call-with-browser-script!
+        call-with-database-connection
+        call-with-database-transaction
+        call-with-element-screenshot!
+        call-with-encrypted-output
+        call-with-hmac-output
+        call-with-input-bytes
+        call-with-input-string
+        call-with-marionette!
+        call-with-page
+        call-with-page!
+        call-with-page-pdf!
+        call-with-page-screenshot!
+        call-with-pdf-from-uri
+        call-with-persistent-database-connection
+        call-with-pk
+        call-with-pool-connection
+        call-with-pool-resource
+        call-with-postmark-connection
+        call-with-pubsub-events
+        call-with-redis
+        call-with-redis-client
+        call-with-redis-pool
+        call-with-redis-pubsub
+        call-with-screenshot
+        call-with-semaphore
+        call-with-test-client+server
+        call-with-transaction
+        call-with-twilio-connection
+        call-with-unzip
+        call-with-waiter
+        case/dep
+        case/enum
+        case-view
+        for/stream
+        form*
+        gen:let
+        let*
+        let-globals
+        place
+        property
+        section
+        serializable-struct
+        serializable-struct/versions
+        struct++
+        system-test-suite
+        test
+        test-commands
+        tpl:xexpr-when
+        xexpr-unless
+        xexpr-when))
+    (defun bp-racket-mode-hook ()
+      (interactive)
+      (setq adaptive-fill-mode t))
+    :config
+    (add-hook 'racket-mode-hook #'bp-racket-mode-hook)
+
+    (flycheck-define-checker racket-review
+      "check racket source code using racket-review"
+      :command ("raco" "review" source)
+      :error-patterns
+      ((error line-start (file-name) ":" line ":" column ":error:" (message) line-end)
+       (warning line-start (file-name) ":" line ":" column ":warning:" (message) line-end))
+      :modes racket-mode)
+    (add-to-list 'flycheck-checkers 'racket-review)
+    (setq racket-repl-buffer-name-function
+          #'racket-repl-buffer-name-project
+          racket-show-functions
+          '(racket-show-echo-area))
+
+    (dolist (id bp-racket-defun-likes)
+      (put id 'racket-indent-function #'defun))
+
+    ;; (require 'eval-in-repl-racket)
+    ;; (define-key racket-mode-map (kbd "<C-return>") 'eir-eval-in-racket)
+
+    :bind (:map racket-mode-map
+                ("{"       . paredit-open-curly)
+                ("}"       . paredit-close-curly)
+                ("C-c C-d" . racket-xp-describe)
+                ("C-c C-r" . racket-xp-rename)
+                ;; ("C-c C-s" . bp-insert-lisp-section)
+                ("C-c r t" . racket-tidy-requires)
+                ("C-c r i" . racket-add-require-for-identifier)
+                ("C-c ."   . racket-xp-visit-definition)
+                ("C-c ,"   . racket-unvisit)))
+
+  ;; (use-package racket-xp
+  ;;   :hook racket-mode)
+
+  (use-package scribble-mode
+    :mode "\\.scrbl\\'")
+
+  (use-package pollen-mode
+    :disabled t
+    :mode "\\.p[mp]?\\'")
+
+#+end_src
+
+** json
+
+#+begin_src emacs-lisp
+
+  (use-package json-snatcher :defer t)
+  (use-package json-reformat :defer t)
+
+  (use-package json-mode
+    :mode "\\.json\\'"
+    :config
+    (setq json-reformat:indent-width 2
+          js-indent-level 2))
+
+#+end_src
+
+** toml
+
+#+begin_src emacs-lisp
+
+  (use-package toml-mode
+    :mode "\\.toml\\'")
+
+#+end_src
+
+** yaml
+
+#+begin_src emacs-lisp
+
+  (use-package yaml-mode
+    :mode "\\.ya?ml\\'")
+
+#+end_src
+
+** web
+
+#+begin_src emacs-lisp
+
+(use-package web-mode
+  :mode (("\\.html?\\'"        . web-mode))
+         ;; ("\\.mjml\\'"         . web-mode)
+         ;; ("\\.vue\\'"          . web-mode)
+         ;; ("\\.hbs\\'"          . web-mode)
+         ;; ("\\.eex\\'"          . web-mode)
+         ;; ("\\.tm?pl\\'"        . web-mode)
+         ;; ("\\.blade\\.php\\'"  . web-mode))
+  :config
+  (setq web-mode-code-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-style-indent-offset 2
+        web-mode-script-indent-offset 2
+        web-mode-markup-indent-offset 2
+
+        web-mode-style-padding 2
+        web-mode-script-padding 2
+
+        web-mode-enable-auto-closing t
+        web-mode-enable-auto-expanding t
+        web-mode-enable-auto-pairing t
+        web-mode-enable-current-element-highlight t))
+        ;; web-mode-content-types-alist '(("jsx" . "\\.mjs\\'"))
+        ;; web-mode-engines-alist '(("django" . "\\.html\\'"))))
 
 #+end_src
