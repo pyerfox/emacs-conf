@@ -22,6 +22,7 @@
 
 (setq make-backup-files nil)
 (setq create-lockfiles nil)
+(setq auto-save-default nil)
 
 (setq x-select-enable-clipboard nil)
 
@@ -120,7 +121,9 @@
 
 (use-package projectile
   :diminish projectile-mode
-  :config (projectile-mode)
+  :config
+  (setq projectile-track-known-projects-automatically nil)
+  (projectile-mode)
   :demand t
   :bind-keymap
   ("C-c p" . projectile-command-map))
@@ -130,7 +133,7 @@
 
 (use-package counsel-projectile
   :after projectile
-  :bind (("C-M-p" . counsel-projectile-find-file))
+  ;; :bind (("C-M-p" . counsel-projectile-find-file))
   :config
   (counsel-projectile-mode))
 
