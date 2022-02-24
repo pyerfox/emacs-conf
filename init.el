@@ -2,7 +2,7 @@
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
+                         ;;("org" . "https://orgmode.org/elpa/")
                          ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)
@@ -153,14 +153,15 @@
   :config
   (which-key-mode 1)
   (define-key help-map "\C-h" 'which-key-C-h-dispatch)
-  (setq which-key-idle-delay 0.3))
+  (setq which-key-idle-delay 0.8))
 
 (use-package autorevert
-  :hook (after-init . global-auto-revert-mode))
+  :config (global-auto-revert-mode 1))
 
 (use-package paredit
-  :diminish paredit-mode
-  :hook ((emacs-lisp-mode lisp-mode racket-mode) . paredit-mode))
+  :disabled t)
+  ;; :diminish paredit-mode
+  ;; :hook ((emacs-lisp-mode lisp-mode racket-mode) . paredit-mode))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
