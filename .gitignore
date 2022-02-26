@@ -9,6 +9,7 @@ auto-save-list
 tramp
 .\#*
 /transient/
+recentf
 
 # Data
 *.zip

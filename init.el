@@ -28,6 +28,10 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+(require 'recentf)
+(recentf-mode 1)
+(setq recentf-max-menu-items 10)
+
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -215,7 +219,7 @@
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-u-scroll nil)
   (setq evil-want-C-i-jump nil)
   ;; (setq evil-respect-visual-line-mode t)
   (setq evil-undo-system 'undo-tree)
@@ -249,9 +253,9 @@
   (setq evil-auto-indent nil)
   (diminish org-indent-mode)
   (set-face-attribute 'org-document-title nil :weight 'bold :height 1.4)
-  (dolist (face '((org-level-1 . 1.3)
+  (dolist (face '((org-level-1 . 1.4)
                   (org-level-2 . 1.2)
-                  (org-level-3 . 1.1)
+                  (org-level-3 . 1.2)
                   (org-level-4 . 1.0)
                   (org-level-5 . 1.0)
                   (org-level-6 . 1.0)
@@ -263,6 +267,11 @@
   :defer t
   :hook (org-mode . ecfg/org-mode-setup)
   :config
+  (setq org-directory "C:/MyData/Workspace/org/")
+  (setq org-agenda-files '("C:/MyData/Workspace/org/agenda.org"))
+  (setq org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)" "CANCELED(c)" )))
+  ;;(setq org-log-done 'time)
+  ;;(setq org-log-done 'note)
   (setq org-ellipsis " ▼"
         org-agenda-files '()
         org-hide-emphasis-markers t
@@ -281,7 +290,8 @@
   :hook (org-mode . org-superstar-mode)
   :custom
   (org-superstar-remove-leading-stars t)
-  (org-superstar-headline-bullets-list '("■" "○" "●" "○" "●" "○" "●")))
+  (org-superstar-headline-bullets-list '("◎" "○" "●" "○" "●" "○" "●")))
+
 
 (require 'org-tempo)
 
@@ -463,24 +473,24 @@
         '(racket-show-echo-area))
 
   (dolist (id bp-racket-defun-likes)
-    (put id 'racket-indent-function #'defun))
+    (put id 'racket-indent-function #'defun)))
 
   ;; (require 'eval-in-repl-racket)
   ;; (define-key racket-mode-map (kbd "<C-return>") 'eir-eval-in-racket)
 
-  :bind (:map racket-mode-map
-              ("{"       . paredit-open-curly)
-              ("}"       . paredit-close-curly)
-              ("C-c C-d" . racket-xp-describe)
-              ("C-c C-r" . racket-xp-rename)
-              ;; ("C-c C-s" . bp-insert-lisp-section)
-              ("C-c r t" . racket-tidy-requires)
-              ("C-c r i" . racket-add-require-for-identifier)
-              ("C-c ."   . racket-xp-visit-definition)
-              ("C-c ,"   . racket-unvisit)))
+ ;; :bind (:map racket-mode-map
+ ;;             ("{"       . paredit-open-curly)
+ ;;             ("}"       . paredit-close-curly)
+ ;;             ("C-c C-d" . racket-xp-describe)
+ ;;             ("C-c C-r" . racket-xp-rename)
+ ;;             ;; ("C-c C-s" . bp-insert-lisp-section)
+ ;;             ("C-c r t" . racket-tidy-requires)
+ ;;             ("C-c r i" . racket-add-require-for-identifier)
+ ;;             ("C-c ."   . racket-xp-visit-definition)
+ ;;             ("C-c ,"   . racket-unvisit)))
 
-;; (use-package racket-xp
-;;   :hook racket-mode)
+(require 'racket-xp)
+(add-hook 'racket-mode-hook #'racket-xp-mode)
 
 (use-package scribble-mode
   :mode "\\.scrbl\\'")
