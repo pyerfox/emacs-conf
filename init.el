@@ -541,3 +541,20 @@
         web-mode-enable-current-element-highlight t))
         ;; web-mode-content-types-alist '(("jsx" . "\\.mjs\\'"))
         ;; web-mode-engines-alist '(("django" . "\\.html\\'"))))
+
+(require 'tcl)
+(defun ecfg/tcl-eval-line-or-region (start end &optional and-go)
+  (interactive "r\nP")
+  (if (region-active-p)
+    (call-interactively #'tcl-eval-region)
+    (save-mark-and-excursion
+      (beginning-of-line)
+      (set-mark-command nil)
+      (end-of-line)
+      (tcl-eval-region (region-beginning) (region-end) and-go)
+      (pop-mark))))
+
+(defun ecfg/tcl-setup ()
+  (local-set-key (kbd "<C-return>") #'ecfg/tcl-eval-line-or-region))
+
+(add-hook 'tcl-mode-hook #'ecfg/tcl-setup)
