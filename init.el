@@ -123,23 +123,23 @@
   :defer t
   :after hydra)
 
-(use-package projectile
-  :diminish projectile-mode
-  :config
-  (setq projectile-track-known-projects-automatically nil)
-  (projectile-mode)
-  :demand t
-  :bind-keymap
-  ("C-c p" . projectile-command-map))
-  ;; :init
-  ;; (when (file-directory-p "~/Projects/Code")
-  ;;   (setq projectile-project-search-path '("~/Projects/Code")))
+;; (use-package projectile
+;;   :diminish projectile-mode
+;;   :config
+;;   (setq projectile-track-known-projects-automatically nil)
+;;   (projectile-mode)
+;;   :demand t
+;;   :bind-keymap
+;;   ("C-c p" . projectile-command-map))
+;;   ;; :init
+;;   ;; (when (file-directory-p "~/Projects/Code")
+;;   ;;   (setq projectile-project-search-path '("~/Projects/Code")))
 
-(use-package counsel-projectile
-  :after projectile
-  ;; :bind (("C-M-p" . counsel-projectile-find-file))
-  :config
-  (counsel-projectile-mode))
+;; (use-package counsel-projectile
+;;   :after projectile
+;;   ;; :bind (("C-M-p" . counsel-projectile-find-file))
+;;   :config
+;;   (counsel-projectile-mode))
 
 (use-package helpful
   :custom
@@ -158,6 +158,35 @@
   (which-key-mode 1)
   (define-key help-map "\C-h" 'which-key-C-h-dispatch)
   (setq which-key-idle-delay 0.8))
+
+(defun ecfg/dired-mode-setup ()
+  (visual-line-mode -1)
+  (setq truncate-lines t)
+  (evil-collection-define-key 'normal 'dired-mode-map
+    ;;"H" 'dired-up-directory
+    ;;"L" 'dired-find-file))
+    "H" 'dired-single-up-directory
+    "L" 'dired-single-buffer))
+
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :bind
+  ("C-x C-j" . dired-jump)
+  ;;:custom
+  ;;(dired-listing-switches "-agho --group-directories-first")
+  :hook (dired-mode . ecfg/dired-mode-setup))
+
+;; (use-package dired-single)
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+;;(use-package dired-open
+;;  :config
+;;  (setq dired-open-extensions nil))
+
+(use-package dired-hide-dotfiles)
 
 (use-package autorevert
   :config (global-auto-revert-mode 1))
