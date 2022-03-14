@@ -11,11 +11,12 @@ tramp
 /transient/
 recentf
 
-# Data
+# Etc
 *.zip
 *.tar
 *.tar.gz
 racket-mode
+.lsp-*
 
 # Org-mode
 .org-id-locations

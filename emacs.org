@@ -85,7 +85,7 @@
                       :font "Fira Code"
                       :weight 'normal
                       :height 100)
-  ;; (set-fontset-font "fontset-default" 'hangul '("D2Coding" . "unicode-bmp"))
+  (set-fontset-font "fontset-default" 'hangul '("D2Coding" . "unicode-bmp"))
   ;; (setq face-font-rescale-alist '(("D2Coding" . 1.3)))
 
 #+end_src
@@ -246,10 +246,7 @@
     ;;(dired-listing-switches "-agho --group-directories-first")
     :hook (dired-mode . ecfg/dired-mode-setup))
 
-  ;; (use-package dired-single)
-
-  (use-package all-the-icons-dired
-    :hook (dired-mode . all-the-icons-dired-mode))
+  (use-package dired-single)
 
   ;;(use-package dired-open
   ;;  :config
@@ -485,11 +482,14 @@
 
   (use-package lsp-mode
     :config
-    (lsp-enable-which-key-integration t))
+    (lsp-enable-which-key-integration t)
+    (define-key lsp-mode-map (kbd "C-c C-l") lsp-command-map))
 
   (use-package lsp-ui
-    :hook (lsp-mode . lsp-ui-mode)
-    :custom (lsp-ui-doc-position 'bottom))
+    :hook
+    (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
 
   ;; (ecfg/leader-key-def
   ;;   "l"  '(:ignore t :which-key "lsp")
@@ -569,13 +569,23 @@
 
 #+begin_src emacs-lisp
 
-  (use-package go-mode
-    :mode "\\.go\\'"
-    :config
-    (setq gofmt-command "goimports")
-    (setq flycheck-go-vet-executable "go")
-    (setq flfycheck-go-staticcheck-executable "staticcheck")
-    (add-hook 'before-save-hook #'gofmt-before-save))
+  (use-package go-mode)
+    ;; :mode "\\.go\\'"
+    ;; :config
+    ;; (setq gofmt-command "goimports")
+    ;; (setq flycheck-go-vet-executable "go")
+    ;; (setq flfycheck-go-staticcheck-executable "staticcheck")
+    ;; (add-hook 'before-save-hook #'gofmt-before-save))
+
+  (defun ecfg/go-mode-setup ()
+    (lsp-register-custom-settings
+     '(("gopls.completeUnimported" t t)
+       ("gopls.staticcheck" t t)))
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+  (add-hook 'go-mode-hook #'lsp-deferred)
+  (add-hook 'go-mode-hook #'ecfg/go-mode-setup)
+
 
 #+end_src
 
