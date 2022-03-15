@@ -32,6 +32,11 @@
 (recentf-mode 1)
 (setq recentf-max-menu-items 10)
 
+(use-package dash :defer t)
+(use-package s :defer t)
+(use-package f :defer t)
+(use-package pythonic :defer t)
+
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -323,6 +328,7 @@
 
 (require 'org-tempo)
 
+(add-to-list 'org-structure-template-alist '("tt" . "src text"))
 (add-to-list 'org-structure-template-alist '("sh" . "src sh"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("sc" . "src scheme"))
@@ -363,30 +369,25 @@
   (define-key lsp-mode-map (kbd "C-c C-l") lsp-command-map))
 
 (use-package lsp-ui
+  :after lsp-mode
   :hook
   (lsp-mode . lsp-ui-mode)
   :custom
-  (lsp-ui-doc-position 'bottom))
-
-;; (ecfg/leader-key-def
-;;   "l"  '(:ignore t :which-key "lsp")
-;;   "ld" 'xref-find-definitions
-;;   "lr" 'xref-find-references
-;;   "ln" 'lsp-ui-find-next-reference
-;;   "lp" 'lsp-ui-find-prev-reference
-;;   "ls" 'counsel-imenu
-;;   "le" 'lsp-ui-flycheck-list
-;;   "lS" 'lsp-ui-sideline-mode
-;;   "lX" 'lsp-execute-code-action)
+  (lsp-ui-doc-position 'bottom)
+  :config
+  ;;(setq lsp-ui-peek-enable t)
+  ;;(setq lsp-ui-peek-always-show t)
+  (setq lsp-ui-sideline-show-diagnostics t)
+  (setq lsp-ui-sideline-show-code-actions t))
 
 (use-package flycheck
   :hook (prog-mode . flycheck-mode)
   :config
   (setq-default
+   flycheck-python-pycompile-executable "python"
    flycheck-standard-error-navigation nil
-   flycheck-disabled-checkers '(racket)
+   flycheck-disabled-checkers '(racket python-mypy)
    flycheck-emacs-lisp-load-path 'inherit))
-   ;; flycheck-flake8rc "setupt.cfg"))
 
 (use-package company
   :diminish company-mode
@@ -420,7 +421,7 @@
   ;; :config
   ;; (setq gofmt-command "goimports")
   ;; (setq flycheck-go-vet-executable "go")
-  ;; (setq flfycheck-go-staticcheck-executable "staticcheck")
+  ;; (setq flycheck-go-staticcheck-executable "staticcheck")
   ;; (add-hook 'before-save-hook #'gofmt-before-save))
 
 (defun ecfg/go-mode-setup ()
@@ -429,8 +430,36 @@
      ("gopls.staticcheck" t t)))
   (add-hook 'before-save-hook #'lsp-format-buffer t t)
   (add-hook 'before-save-hook #'lsp-organize-imports t t))
-(add-hook 'go-mode-hook #'lsp-deferred)
+;;(add-hook 'go-mode-hook #'lsp-deferred)
 (add-hook 'go-mode-hook #'ecfg/go-mode-setup)
+
+(use-package python-mode
+  :after conda
+  :custom
+  (py-shell-name "python"))
+  ;;(python-shell-interpreter "ipython")
+  ;;(python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True"))
+
+(defun ecfg/python-mode-setup ()
+  (require 'eval-in-repl-python)
+  (local-set-key (kbd "<C-return>") 'eir-eval-in-python)
+  (require 'lsp-pyright))
+  ;;(lsp-deferred))
+
+(use-package lsp-pyright
+  :custom (lsp-pyright-typechecking-mode "off")
+  :hook (python-mode . ecfg/python-mode-setup))
+
+(use-package conda
+  :load-path "vendor/conda"
+  :config
+  ;; if you want interactive shell support, include:
+  (conda-env-initialize-interactive-shells)
+  ;; if you want eshell support, include:
+  (conda-env-initialize-eshell)
+  (conda-env-activate "base") 
+  :custom
+  (conda-anaconda-home "C:/ProgramData/Miniconda3"))
 
 (use-package racket-mode
   :mode "\\.rkt\\'"
