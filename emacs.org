@@ -42,13 +42,16 @@
   (setq create-lockfiles nil)
   (setq auto-save-default nil)
 
-  (setq x-select-enable-clipboard nil)
+  (setq select-enable-clipboard nil)
 
   (defalias 'yes-or-no-p 'y-or-n-p)
 
   (require 'recentf)
   (recentf-mode 1)
   (setq recentf-max-menu-items 10)
+
+  (setq gc-cons-threshold (* 1024 1024 100))
+  (setq read-process-output-max (* 1024 1024))
 
   (use-package dash :defer t)
   (use-package s :defer t)
@@ -225,7 +228,7 @@
     :config
     (which-key-mode 1)
     (define-key help-map "\C-h" 'which-key-C-h-dispatch)
-    (setq which-key-idle-delay 0.8))
+    (setq which-key-idle-delay 1.0))
 
 #+end_src
 
@@ -487,6 +490,9 @@
 #+begin_src emacs-lisp
 
   (use-package lsp-mode
+    :custom
+    (lsp-enable-snippet nil)
+    (lsp-idle-delay 1.0)
     :config
     (lsp-enable-which-key-integration t)
     (define-key lsp-mode-map (kbd "C-c C-l") lsp-command-map))
@@ -496,12 +502,12 @@
     :hook
     (lsp-mode . lsp-ui-mode)
     :custom
-    (lsp-ui-doc-position 'bottom)
-    :config
-    ;;(setq lsp-ui-peek-enable t)
-    ;;(setq lsp-ui-peek-always-show t)
-    (setq lsp-ui-sideline-show-diagnostics t)
-    (setq lsp-ui-sideline-show-code-actions t))
+    (lsp-ui-doc-position 'bottom))
+    ;; :config
+    ;; ;;(setq lsp-ui-peek-enable t)
+    ;; ;;(setq lsp-ui-peek-always-show t)
+    ;; (setq lsp-ui-sideline-show-diagnostics t)
+    ;; (setq lsp-ui-sideline-show-code-actions t))
 
 #+end_src
 
@@ -533,7 +539,7 @@
     ;;             ("<tab>" . company-indent-or-complete-common))
     :custom
     (company-minimum-prefix-length 1)
-    (company-idle-delay 0.3))
+    (company-idle-delay 1.0))
 
   (use-package company-box
     :hook (company-mode . company-box-mode))
@@ -570,10 +576,9 @@
 
 #+begin_src emacs-lisp
 
-  (use-package go-mode)
-    ;; :mode "\\.go\\'"
-    ;; :config
-    ;; (setq gofmt-command "goimports")
+  (use-package go-mode
+    :config
+    (setq gofmt-command "goimports"))
     ;; (setq flycheck-go-vet-executable "go")
     ;; (setq flycheck-go-staticcheck-executable "staticcheck")
     ;; (add-hook 'before-save-hook #'gofmt-before-save))
@@ -582,6 +587,7 @@
     (lsp-register-custom-settings
      '(("gopls.completeUnimported" t t)
        ("gopls.staticcheck" t t)))
+    (setq tab-width 4)
     (add-hook 'before-save-hook #'lsp-format-buffer t t)
     (add-hook 'before-save-hook #'lsp-organize-imports t t))
   ;;(add-hook 'go-mode-hook #'lsp-deferred)
@@ -624,7 +630,6 @@
     (conda-anaconda-home "C:/ProgramData/Miniconda3"))
 
 #+end_src
-
 
 ** racket
 
@@ -777,33 +782,32 @@
 
 #+begin_src emacs-lisp
 
-(use-package web-mode
-  :mode (("\\.html?\\'"        . web-mode))
-         ;; ("\\.mjml\\'"         . web-mode)
-         ;; ("\\.vue\\'"          . web-mode)
-         ;; ("\\.hbs\\'"          . web-mode)
-         ;; ("\\.eex\\'"          . web-mode)
-         ;; ("\\.tm?pl\\'"        . web-mode)
-         ;; ("\\.blade\\.php\\'"  . web-mode))
-  :config
-  (setq web-mode-code-indent-offset 2
-        web-mode-css-indent-offset 2
-        web-mode-style-indent-offset 2
-        web-mode-script-indent-offset 2
-        web-mode-markup-indent-offset 2
-
-        web-mode-style-padding 2
-        web-mode-script-padding 2
-
-        web-mode-enable-auto-closing t
-        web-mode-enable-auto-expanding t
-        web-mode-enable-auto-pairing t
-        web-mode-enable-current-element-highlight t))
-        ;; web-mode-content-types-alist '(("jsx" . "\\.mjs\\'"))
-        ;; web-mode-engines-alist '(("django" . "\\.html\\'"))))
+;; (use-package web-mode
+;;   :mode (("\\.html?\\'"        . web-mode))
+;;          ;; ("\\.mjml\\'"         . web-mode)
+;;          ;; ("\\.vue\\'"          . web-mode)
+;;          ;; ("\\.hbs\\'"          . web-mode)
+;;          ;; ("\\.eex\\'"          . web-mode)
+;;          ;; ("\\.tm?pl\\'"        . web-mode)
+;;          ;; ("\\.blade\\.php\\'"  . web-mode))
+;;   :config
+;;   (setq web-mode-code-indent-offset 2
+;;         web-mode-css-indent-offset 2
+;;         web-mode-style-indent-offset 2
+;;         web-mode-script-indent-offset 2
+;;         web-mode-markup-indent-offset 2
+;; 
+;;         web-mode-style-padding 2
+;;         web-mode-script-padding 2
+;; 
+;;         web-mode-enable-auto-closing t
+;;         web-mode-enable-auto-expanding t
+;;         web-mode-enable-auto-pairing t
+;;         web-mode-enable-current-element-highlight t))
+;;         ;; web-mode-content-types-alist '(("jsx" . "\\.mjs\\'"))
+;;         ;; web-mode-engines-alist '(("django" . "\\.html\\'"))))
 
 #+end_src
-
 
 ** tcl
 
