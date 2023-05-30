@@ -66,23 +66,24 @@
 (set-fontset-font "fontset-default" 'hangul '("D2Coding" . "unicode-bmp"))
 ;; (setq face-font-rescale-alist '(("D2Coding" . 1.3)))
 
-(use-package doom-themes
-  :config
-  (load-theme 'doom-monokai-machine t))
+;;(use-package doom-themes
+;;  :config
+;;  (load-theme 'doom-monokai-machine t))
+(load-theme 'tsdh-light t)
 
 ;; need to run (all-the-icons-install-fonts) once
-(use-package doom-modeline  
-  :config
-  (doom-modeline-mode 1)
-  (setq doom-modeline-height 1)
-  (set-face-attribute 'mode-line nil :height 80)
-  (set-face-attribute 'mode-line-inactive nil
-                      :height 80 :background "#202020"))
-;  :custom-face
-;  (mode-line ((t (:height 1))))
-;  (mode-line-inactive ((t (:height 1 :background "#202020")))) 
-;  :config
-;  (doom-modeline-height 1))
+;; (use-package doom-modeline  
+;;   :config
+;;   (doom-modeline-mode 1)
+;;   (setq doom-modeline-height 1)
+;;   (set-face-attribute 'mode-line nil :height 80)
+;;   (set-face-attribute 'mode-line-inactive nil
+;;                       :height 80 :background "#202020"))
+;; :custom-face
+;; (mode-line ((t (:height 1))))
+;; (mode-line-inactive ((t (:height 1 :background "#202020")))) 
+;; :config
+;; (doom-modeline-height 1))
 
 (use-package magit
   ;; :bind ("C-M-;" . magit-status)
@@ -213,10 +214,10 @@
   (general-evil-setup)
   (general-define-key
    "<escape>" 'keyboard-esacpe-quit
-   "C-M-j" 'counsel-switch-buffer)
-  (general-create-definer ecfg/leader-key-def
-    :keymaps '(normal insert visual emacs)
-    :prefix "M-SPC"))
+   "C-M-j" 'counsel-switch-buffer))
+;; (general-create-definer ecfg/leader-key-def
+;;   :keymaps '(normal insert visual emacs)
+;;   :prefix "SPC")
 
 ;; (defhydra hydra-text-scale (:timeout 4)
 ;;   "scale text"
@@ -304,14 +305,15 @@
   :hook (org-mode . ecfg/org-mode-setup)
   :config
   (setq org-directory "C:/MyData/Workspace/org/")
-  (setq org-agenda-files '("C:/MyData/Workspace/org/agenda.org"))
   (setq org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)" "CANCELED(c)" )))
   ;;(setq org-log-done 'time)
   ;;(setq org-log-done 'note)
-  (setq org-ellipsis " ▼"
-        org-agenda-files '()
-        org-hide-emphasis-markers t
+  (setq 
+        org-agenda-files '("C:/MyData/Workspace/org/agenda.org")
+	    org-default-notes-file '("C:/MyData/Workspace/org/capture.org")
         ))
+        ;; org-ellipsis " ▼"
+        ;; org-hide-emphasis-markers t
         ;; org-src-fontify-natively t
         ;; org-fontify-quote-and-verse-blocks t
         ;; org-src-tab-acts-natively t
@@ -340,19 +342,30 @@
 (add-to-list 'org-structure-template-alist '("go" . "src go"))
 (add-to-list 'org-structure-template-alist '("yaml" . "src yaml"))
 (add-to-list 'org-structure-template-alist '("json" . "src json"))
+(add-to-list 'org-structure-template-alist '("pu" . "src plantuml"))
+
+;;(custom-set-faces
+;; ;; '(org-block-begin-line
+;; ;;   ((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF"))))
+;; '(org-block
+;;   ((t (:background "#202030"))))
+;; ;; '(org-block-end-line
+;; ;;   ((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF"))))
+;; )
 
 (custom-set-faces
- ;; '(org-block-begin-line
- ;;   ((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF"))))
  '(org-block
-   ((t (:background "#202030"))))
- ;; '(org-block-end-line
- ;;   ((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF"))))
+   ((t (:background "#EEEEEE"))))
  )
 
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((emacs-lisp . t)))
+ '((emacs-lisp . t)
+   (plantuml . t)
+   ))
+
+(setq org-plantuml-exec-mode 'plantuml)
+(setq org-confirm-babel-evaluate nil)
 
 ;; Automatically tangle this config file
 (defun ecfg/org-babel-tangle-config ()
@@ -391,8 +404,11 @@
   :config
   (setq-default
    flycheck-python-pycompile-executable "python"
+   flycheck-go-gofmt-executable "goimports"
+   flycheck-go-vet-executable "go"
+   flycheck-go-staticcheck-executable "staticcheck"
    flycheck-standard-error-navigation nil
-   flycheck-disabled-checkers '(racket python-mypy)
+   flycheck-disabled-checkers '(racket python-mypy go-staticcheck)
    flycheck-emacs-lisp-load-path 'inherit))
 
 (use-package company
@@ -425,8 +441,6 @@
 (use-package go-mode
   :config
   (setq gofmt-command "goimports"))
-  ;; (setq flycheck-go-vet-executable "go")
-  ;; (setq flycheck-go-staticcheck-executable "staticcheck")
   ;; (add-hook 'before-save-hook #'gofmt-before-save))
 
 (defun ecfg/go-mode-setup ()
@@ -435,12 +449,12 @@
      ("gopls.staticcheck" t t)))
   (setq tab-width 4)
   (add-hook 'before-save-hook #'lsp-format-buffer t t)
-  (add-hook 'before-save-hook #'lsp-organize-imports t t))
-;;(add-hook 'go-mode-hook #'lsp-deferred)
+  (add-hook 'before-save-hook #'lsp-organize-imports t t)
+  (lsp-deferred))
 (add-hook 'go-mode-hook #'ecfg/go-mode-setup)
 
 (use-package python-mode
-  :after conda
+  ;;:after conda
   :custom
   (py-shell-name "python"))
   ;;(python-shell-interpreter "ipython")
@@ -449,23 +463,23 @@
 (defun ecfg/python-mode-setup ()
   (require 'eval-in-repl-python)
   (local-set-key (kbd "<C-return>") 'eir-eval-in-python)
-  (require 'lsp-pyright))
-  ;;(lsp-deferred))
+  (require 'lsp-pyright)
+  (lsp-deferred))
 
 (use-package lsp-pyright
   :custom (lsp-pyright-typechecking-mode "off")
   :hook (python-mode . ecfg/python-mode-setup))
 
-(use-package conda
-  :load-path "vendor/conda"
-  :config
-  ;; if you want interactive shell support, include:
-  (conda-env-initialize-interactive-shells)
-  ;; if you want eshell support, include:
-  (conda-env-initialize-eshell)
-  (conda-env-activate "base") 
-  :custom
-  (conda-anaconda-home "C:/ProgramData/Miniconda3"))
+;;(use-package conda
+;;  :load-path "vendor/conda"
+;;  :config
+;;  ;; if you want interactive shell support, include:
+;;  (conda-env-initialize-interactive-shells)
+;;  ;; if you want eshell support, include:
+;;  (conda-env-initialize-eshell)
+;;  (conda-env-activate "base") 
+;;  :custom
+;;  (conda-anaconda-home "C:/ProgramData/Miniconda3"))
 
 (use-package racket-mode
   :mode "\\.rkt\\'"
