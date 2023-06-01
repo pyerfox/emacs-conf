@@ -412,7 +412,8 @@
     ;;(setq org-log-done 'note)
     (setq 
           org-agenda-files '("C:/MyData/Workspace/org/agenda.org")
-	      org-default-notes-file '("C:/MyData/Workspace/org/capture.org")
+          org-default-notes-file '("C:/MyData/Workspace/org/capture.org")
+          org-M-RET-may-split-line nil
           ))
           ;; org-ellipsis " ▼"
           ;; org-hide-emphasis-markers t
