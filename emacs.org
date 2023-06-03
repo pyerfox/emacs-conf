@@ -1,4 +1,4 @@
-#+title Emacs Configuration
+#+title: Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el
 
 * Package System
@@ -391,30 +391,46 @@
     (visual-line-mode 1)
     (setq evil-auto-indent nil)
     (diminish org-indent-mode)
-    (set-face-attribute 'org-document-title nil :weight 'bold :height 1.4)
-    (dolist (face '((org-level-1 . 1.4)
-                    (org-level-2 . 1.2)
-                    (org-level-3 . 1.2)
-                    (org-level-4 . 1.0)
-                    (org-level-5 . 1.0)
-                    (org-level-6 . 1.0)
-                    (org-level-7 . 1.0)
-                    (org-level-8 . 1.0)))
-      (set-face-attribute (car face) nil :weight 'medium :height (cdr face))))
+    ;; (set-face-attribute 'org-document-title nil :weight 'bold :height 1.4)
+    ;; (dolist (face '((org-level-1 . 1.4)
+    ;;                 (org-level-2 . 1.2)
+    ;;                 (org-level-3 . 1.2)
+    ;;                 (org-level-4 . 1.0)
+    ;;                 (org-level-5 . 1.0)
+    ;;                 (org-level-6 . 1.0)
+    ;;                 (org-level-7 . 1.0)
+    ;;                 (org-level-8 . 1.0)))
+    ;;   (set-face-attribute (car face) nil :weight 'medium :height (cdr face)))
+    )
 
   (use-package org
     :defer t
     :hook (org-mode . ecfg/org-mode-setup)
     :config
     (setq org-directory "C:/MyData/Workspace/org/")
-    (setq org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)" "CANCELED(c)" )))
+    ;;(setq org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)" "CANCELED(c)" )))
     ;;(setq org-log-done 'time)
     ;;(setq org-log-done 'note)
-    (setq 
-          org-agenda-files '("C:/MyData/Workspace/org/agenda.org")
-          org-default-notes-file '("C:/MyData/Workspace/org/capture.org")
-          org-M-RET-may-split-line nil
-          ))
+    (setq org-agenda-files '("C:/MyData/Workspace/org/gtd/next.org"
+                             "C:/MyData/Workspace/org/gtd/project.org"))
+    (setq org-default-notes-file '("C:/MyData/Workspace/org/capture.org"))
+    (setq org-M-RET-may-split-line nil)
+    (setq gtd/next-action-head "Next actions:")
+    (setq gtd/waiting-head "Waiting on:")
+    (setq gtd/complete-head "Completed items:")
+    (setq gtd/project-head "Projects:")
+    (setq gtd/someday-head "Someday/maybe:")
+    (setq org-agenda-custom-commands
+          '(
+            ("g" "GTD view"
+             ((agenda)
+              (todo "NEXT" ((org-agenda-overriding-header gtd/next-action-head)))
+              (todo "WAITING" ((org-agenda-overriding-header gtd/waiting-head)))
+              (todo "DONE" ((org-agenda-overriding-header gtd/complete-head)))
+              (tags "PROJECTS-SOMEDAY" ((org-agenda-overriding-header gtd/project-head)))
+              (tags "SOMEDAY"  ((org-agenda-overriding-header gtd/someday-head)))
+              ))))
+  )
           ;; org-ellipsis " ▼"
           ;; org-hide-emphasis-markers t
           ;; org-src-fontify-natively t
