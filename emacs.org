@@ -415,6 +415,16 @@
                              "C:/MyData/Workspace/org/gtd/project.org"))
     (setq org-default-notes-file '("C:/MyData/Workspace/org/capture.org"))
     (setq org-M-RET-may-split-line nil)
+
+    (setq org-plantuml-exec-mode 'plantuml)
+    (setq org-confirm-babel-evaluate nil)
+
+    (setq org-src-fontify-natively t)
+    (setq org-fontify-quote-and-verse-blocks t)
+    ;;(setq org-src-tab-acts-natively t)
+    (setq org-edit-src-content-indentation 0)
+    (setq org-src-preserve-indentation t)
+
     (setq gtd/next-action-head "Next actions:")
     (setq gtd/waiting-head "Waiting on:")
     (setq gtd/complete-head "Completed items:")
@@ -433,12 +443,7 @@
   )
           ;; org-ellipsis " ▼"
           ;; org-hide-emphasis-markers t
-          ;; org-src-fontify-natively t
-          ;; org-fontify-quote-and-verse-blocks t
-          ;; org-src-tab-acts-natively t
-          ;; org-edit-src-content-indentation 2
           ;; org-hide-block-startup nil
-          ;; org-src-preserve-indentation nil
           ;; org-startup-folded 'content
           ;; org-cycle-separator-lines 2))
 
@@ -479,6 +484,23 @@
 
 #+end_src
 
+** plantuml
+
+#+begin_src emacs-lisp
+
+  (use-package plantuml-mode
+    :defer t
+    :hook (plantuml-mode . (lambda ()
+			     (setq evil-shift-width 2)
+			     (setq plantuml-indent-level 2)
+			     (setq indent-tabs-mode nil)
+			     ))
+    :config
+    (setq plantuml-executable-path "C:/ProgramData/chocolatey/bin/plantuml.exe")
+    (setq plantuml-default-exec-mode 'executable))
+
+#+end_src
+
 ** babel
 
 #+begin_src emacs-lisp
@@ -488,9 +510,6 @@
    '((emacs-lisp . t)
      (plantuml . t)
      ))
-
-  (setq org-plantuml-exec-mode 'plantuml)
-  (setq org-confirm-babel-evaluate nil)
 
 #+end_src
 
